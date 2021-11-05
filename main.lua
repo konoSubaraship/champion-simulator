@@ -2,6 +2,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/prezt
 
 local MainTab = Library:CreateTab('Main', 'Champion Simulator')
 local BuyTab = Library:CreateTab('Shop', 'Champion Simulator')
+local HatchTab = Library:CreateTab('Hatch', 'Champion Simulator')
 local MiscTab = Library:CreateTab('Misc', 'Champion Simulator')
 
 local Tool = game.Players.LocalPlayer.Backpack:FindFirstChildWhichIsA('Tool') or game.Players.LocalPlayer.Character:FindFirstChildWhichIsA('Tool')
@@ -10,6 +11,14 @@ local WorldIndexes = {}
 
 for i,v in pairs(require(game.ReplicatedStorage.Modules.Worlds)['Home World']) do 
     WorldIndexes[v] = i 
+end 
+
+local EggIndexes = {} 
+local EggDropdown = {}
+
+for i,v in pairs(require(game.ReplicatedStorage.Modules.Eggs)) do 
+    table.insert(EggDropdown, v.Name)
+    EggIndexes[v.Name] = i
 end 
 
 MainTab:CreateToggle('Auto Glove', function(t)
@@ -43,6 +52,14 @@ end)
 BuyTab:CreateDropDown('Select Area', require(game.ReplicatedStorage.Modules.Worlds)['Home World'], function(t)
     _G.SelectedArea = WorldIndexes[t]
 end) 
+
+HatchTab:CreateToggle('Auto Hatch Egg', function(t)
+    _G.AutoHatchEgg = t 
+end) 
+
+HatchTab:CreateDropDown('Select Egg', EggDropdown, function(t)
+    _G.SelectedEgg = EggIndexes[t]
+end)
 
 MiscTab:CreateButton('Infinite Jumps', function()
     game.Players.LocalPlayer.Others.DoubleJumps.Value = 9e9
@@ -97,3 +114,11 @@ task.spawn(function()
         end 
     end 
 end)
+
+task.spawn(function()
+    while wait(.1) do 
+        if _G.AutoHatchEgg and _G.SelectedEgg then 
+            game.ReplicatedStorage.Remotes.Functions.EggHatch:InvokeServer('single', _G.SelectedEgg)
+        end 
+    end 
+end) 
